@@ -1,0 +1,54 @@
+{
+  "files": [
+    {
+      "id": "1",
+      "name": "Document A",
+      "uploadDate": "2025-04-17",
+      "filename": "contract.pdf"
+    },
+    {
+      "id": "2",
+      "name": "Contract Draft",
+      "uploadDate": "2025-04-16",
+      "filename": "contract2.docx"
+    },
+    {
+      "id": "3",
+      "name": "Word Document Notes",
+      "uploadDate": "2025-04-15",
+      "filename": "word-doc.docx"
+    }
+  ],
+  "comments": {
+    "1": [
+      {
+        "id": "c1",
+        "author": "User1",
+        "text": "Initial comment on Document A."
+      },
+      {
+        "id": "c1744911083156",
+        "author": "Candidate",
+        "text": "test"
+      },
+      {
+        "id": "c1744915479434",
+        "author": "Candidate",
+        "text": "test 2\n"
+      }
+    ],
+    "2": [],
+    "3": [
+      {
+        "id": "c2",
+        "author": "User2",
+        "text": "Important note on Slide 3."
+      },
+      {
+        "id": "c3",
+        "author": "User1",
+        "text": "Agreed."
+      }
+    ]
+  }
+}

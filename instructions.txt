@@ -1,0 +1,191 @@
+# Coding Challenge 
+
+**Phase 1: Setting up the Backend (Express Server)**
+
+1.  **Create a new folder named `backend` in the root of your project.**
+2.  **Open the `backend` folder in the terminal within VS Code.**
+3.  **Instruct the AI to initialize a Node.js project:** `Initialize a new Node.js project using npm.` (This should generate a `package.json` file).
+4.  **Instruct the AI to install the necessary dependencies:** `Install the express and cors packages.` (`npm install express cors`).
+5.  **Instruct the AI to create a file named `server.js` in the `backend` folder.**
+6.  **Instruct the AI to add the basic structure for an Express server in `server.js`:**
+    ```javascript
+    // Basic Express server setup
+    const express = require('express');
+    const cors = require('cors');
+    const app = express();
+    const port = 3001; // Or another port
+
+    app.use(cors());
+    app.use(express.json()); // To parse JSON request bodies
+
+    // Define your API routes here
+
+    app.listen(port, () => {
+      console.log(`Server listening on port ${port}`);
+    });
+    ```
+7.  **Instruct the AI to create a folder named `data` inside the `backend` folder.**
+8.  **Instruct the AI to create a file named `data.json` inside the `data` folder.**
+9.  **Instruct the AI to add the initial data structure for files and comments in `data.json`:**
+    ```json
+    {
+      "files": [
+        { "id": "1", "name": "Document A", "uploadDate": "2025-04-17" },
+        { "id": "2", "name": "Spreadsheet B", "uploadDate": "2025-04-16" },
+        { "id": "3", "name": "Presentation C", "uploadDate": "2025-04-15" }
+      ],
+      "comments": {
+        "1": [
+          { "id": "c1", "author": "User1", "text": "Initial comment on Document A." }
+        ],
+        "2": [],
+        "3": [
+          { "id": "c2", "author": "User2", "text": "Important note on Slide 3." },
+          { "id": "c3", "author": "User1", "text": "Agreed." }
+        ]
+      }
+    }
+    ```
+10. **Instruct the AI to add the API endpoint to fetch all files in `server.js`:**
+    ```javascript
+    // In server.js, after the app.use lines:
+    const data = require('./data/data.json');
+
+    app.get('/api/files', (req, res) => {
+      res.json(data.files);
+    });
+    ```
+11. **Instruct the AI to add the API endpoint to fetch comments for a specific file in `server.js`:**
+    ```javascript
+    // In server.js, after the previous route:
+    app.get('/api/files/:fileId/comments', (req, res) => {
+      const fileId = req.params.fileId;
+      const comments = data.comments[fileId] || [];
+      res.json(comments);
+    });
+    ```
+12. **Instruct the AI to add the API endpoint to add a new comment to a specific file in `server.js`:**
+    ```javascript
+    // In server.js, after the previous route:
+    const fs = require('fs').promises; // For asynchronous file writing
+    const path = require('path');
+
+    app.post('/api/files/:fileId/comments', async (req, res) => {
+      const fileId = req.params.fileId;
+      const newComment = {
+        id: `c${Date.now()}`, // Simple unique ID
+        author: 'Candidate', // You can hardcode this for the challenge
+        text: req.body.text,
+      };
+
+      if (!data.comments[fileId]) {
+        data.comments[fileId] = [];
+      }
+      data.comments[fileId].push(newComment);
+
+      // Persist the updated data to data.json (basic implementation)
+      try {
+        await fs.writeFile(path.join(__dirname, 'data', 'data.json'), JSON.stringify(data, null, 2));
+        res.status(201).json(newComment); // Respond with the newly created comment
+      } catch (error) {
+        console.error('Error writing to data.json:', error);
+        res.status(500).json({ error: 'Failed to save comment' });
+      }
+    });
+    ```
+
+**Phase 2: Setting up the Frontend (Next.js App)**
+
+1.  **In the root of your project (outside the `backend` folder), instruct the AI to create a new Next.js app:** `Create a new Next.js app using npx create-next-app@latest frontend.` (This will create a folder named `frontend`).
+2.  **Instruct the AI to navigate into the `frontend` folder in the terminal:** `cd frontend`.
+3.  **Instruct the AI to modify the `pages/index.js` file (or create a new page/component structure if you prefer) to fetch and display the list of files.** For example:
+    ```javascript
+    // In frontend/pages/index.js
+    import { useState, useEffect } from 'react';
+
+    export default function Home() {
+      const [files, setFiles] = useState([]);
+
+      useEffect(() => {
+        fetch('http://localhost:3001/api/files') // Adjust URL if needed
+          .then(res => res.json())
+          .then(data => setFiles(data));
+      }, []);
+
+      return (
+        <div>
+          <h1>File List</h1>
+          <ul>
+            {files.map(file => (
+              <li key={file.id}>{file.name}</li>
+            ))}
+          </ul>
+          {/* Add more UI elements later */}
+        </div>
+      );
+    }
+    ```
+4.  **Instruct the AI to create a new component in the `frontend/components` folder (if you have one, or directly in `pages` for simplicity) named `CommentSection.js` to display and add comments.**
+5.  **Instruct the AI to add the basic structure for the `CommentSection` component in `frontend/components/CommentSection.js`:**
+    ```javascript
+    // In frontend/components/CommentSection.js
+    import { useState, useEffect } from 'react';
+
+    function CommentSection({ fileId }) {
+      const [comments, setComments] = useState([]);
+      const [newCommentText, setNewCommentText] = useState('');
+
+      useEffect(() => {
+        if (fileId) {
+          fetch(`http://localhost:3001/api/files/${fileId}/comments`) // Adjust URL if needed
+            .then(res => res.json())
+            .then(data => setComments(data));
+        } else {
+          setComments([]);
+        }
+      }, [fileId]);
+
+      const handleAddComment = async () => {
+        if (newCommentText && fileId) {
+          const response = await fetch(`http://localhost:3001/api/files/${fileId}/comments`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: newCommentText }),
+          });
+
+          if (response.ok) {
+            const newComment = await response.json();
+            setComments([...comments, newComment]);
+            setNewCommentText('');
+          } else {
+            console.error('Failed to add comment');
+          }
+        }
+      };
+
+      return (
+        <div>
+          <h2>Comments</h2>
+          {comments.map(comment => (
+            <div key={comment.id}>
+              <p><strong>{comment.author}:</strong> {comment.text}</p>
+            </div>
+          ))}
+          <h3>Add New Comment</h3>
+          <textarea
+            value={newCommentText}
+            onChange={e => setNewCommentText(e.target.value)}
+            placeholder="Your comment..."
+          />
+          <button onClick={handleAddComment}>Add Comment</button>
+        </div>
+      );
+    }
+
+    export default CommentSection;
+    ```
+6.  **Instruct the AI to update `pages/index.js` to include the `CommentSection` component and manage the selected file.** You'll need to add state to track the selected file and logic to pass the `fileId` to the `CommentSection`.
+
+These instructions provide a solid foundation for the candidate to build upon. Remember to guide the AI step-by-step and review the generated code to ensure it aligns with your requirements. You might need to refine the instructions or the generated code as you go. Good luck!
