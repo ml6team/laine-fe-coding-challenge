@@ -37,9 +37,9 @@ This project provides a basic scaffold for a file management application with a 
 2. **Verify Core Functionality:**
 
    * Run both servers and confirm the file list loads, selection works, and basic commenting is functional.
-3. **Implement Server-Side DOCX Rendering:**
+3. **Implement File Previews (DOCX and PDF):**
 
-   * **Backend Task:**
+   * **Backend Task (DOCX Conversion):**
      * Add a Node.js library capable of converting `.docx` files to HTML to the backend project (e.g., `mammoth`). Install it using `npm install mammoth` in the `backend` directory.
      * Create a new API endpoint in `backend/server.js`, for example: `GET /api/files/:fileId/content`.
      * This endpoint should:
@@ -49,21 +49,36 @@ This project provides a basic scaffold for a file management application with a 
        * Use the chosen library (e.g., `mammoth.convertToHtml()`) to convert the `.docx` file buffer/content into an HTML string.
        * Handle potential errors during conversion.
        * Send the resulting HTML string back as the response (e.g., `res.send(result.value)`).
-       * If the file is *not* a `.docx` file, respond with an appropriate message or status code (e.g., 400 Bad Request or `{ message: 'Content rendering not supported for this file type' }`).
-   * **Frontend Task:**
-     * Modify the frontend (`page.tsx` or a new detail component) so that when a `.docx` file is selected:
-       * It calls the new `/api/files/:fileId/content` endpoint to fetch the HTML content.
-       * Display a loading state while fetching.
-       * Display the fetched HTML content within a designated area on the page.
-       * **Important:** Use `dangerouslySetInnerHTML` to render the HTML. Be aware of the security implications - for this challenge, direct rendering is acceptable, but in a real application, you would typically sanitize the HTML first using a library like `DOMPurify` to prevent XSS attacks.
-       * Handle potential errors during fetching (e.g., display an error message if the backend fails to convert or return the content).
-     * For non-`.docx` files (like the PDF), you can either show a message like "Preview not available" or implement the download functionality described previously as an alternative.
+       * If the file is *not* a `.docx` file, proceed to the next check (or respond appropriately if no other preview type is supported).
+   * **Backend Task (PDF Serving):**
+     * Create another API endpoint (or modify the previous one) specifically for serving files suitable for browser viewing, e.g., `GET /api/files/:fileId/view`.
+     * This endpoint should:
+       * Find the file metadata in `data.json` using `:fileId`.
+       * Get the `filename` (e.g., "contract.pdf").
+       * Construct the full path to the file in `backend/data`.
+       * Check if the file exists.
+       * If the file is a `.pdf`, set the response header `Content-Type` to `application/pdf`.
+       * Read the PDF file and send its contents in the response. **Do not** set the `Content-Disposition: attachment` header. (Using `res.sendFile()` in Express is recommended).
+       * If the file is not a PDF (and wasn't handled by DOCX conversion), respond with an appropriate error (e.g., 400 or `{ message: 'Preview not supported' }`).
+   * **Frontend Task (Conditional Rendering):**
+     * Modify the frontend (`page.tsx` or a new detail component) to determine the selected file's type based on its `filename` (you may need to ensure the `filename` is available in the frontend state when a file is selected).
+     * When a `.docx` file is selected:
+       * Call the `/api/files/:fileId/content` endpoint.
+       * Display a loading state.
+       * Render the fetched HTML using `dangerouslySetInnerHTML` in a designated area. (Acknowledge security implications for the challenge).
+       * Handle errors.
+     * When a `.pdf` file is selected:
+       * Render an `<iframe>` element.
+       * Set the `src` attribute to the PDF viewing endpoint (e.g., `/api/files/:fileId/view`).
+       * Set appropriate `width`, `height`, and `title` attributes for the iframe.
+     * For any other file types, display a message like "Preview not available for this file type."
+     * Ensure the Comment section is still accessible, perhaps alongside or below the preview area.
 4. **(Optional) Enhance File Details Display:**
 
-   * Display the selected file's details (name, upload date) more prominently when selected.
+   * Display the selected file's details (name, upload date) more prominently when selected, perhaps above the preview/comment area.
 5. **(Optional) Refine Styling:**
 
-   * Improve the visual presentation, especially the layout of the file list, selected file details, rendered content area, and comments.
+   * Improve the visual presentation, especially the layout of the file list, selected file details, preview area (iframe/HTML content), and comments.
 6. **(Optional) Enhance Error Handling & Loading States:**
 
-   * Add more specific user feedback for loading states (e.g., when converting/fetching DOCX content) and error scenarios.
+   * Add more specific user feedback for loading states (e.g., when converting/fetching DOCX, loading PDF iframe) and error scenarios.
