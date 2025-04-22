@@ -45,7 +45,7 @@ function FileContent({ fileId, filename }: FileContentProps) {
         } else if (extension == 'pdf') {
           return res.blob().then((blob) => {
             const url = URL.createObjectURL(blob);
-            const html = `<iframe src="${url}" width="100%" height="600px"></iframe>`;
+            const html = `<iframe src="${url}" width="100%" height="600px" title=${filename}></iframe>`;
             return { html };
           });
         } else {
