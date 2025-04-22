@@ -3,17 +3,20 @@
 import type React from "react"; // Add React import
 import { useState, useEffect } from "react";
 import CommentSection from "@/components/CommentSection"; // Import the component
+import FileContent from "@/components/FileContent";
 
 // Define an interface for the file structure
 interface File {
   id: string;
   name: string;
   uploadDate: string;
+  filename: string;
 }
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]); // Use the File interface
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null); // State for selected file ID
+  const [selectFilename, setSelectedFileName] = useState<string | null>(null);
   const [isLoadingFiles, setIsLoadingFiles] = useState(false);
   const [errorFiles, setErrorFiles] = useState<string | null>(null);
 
@@ -39,17 +42,19 @@ export default function Home() {
       });
   }, []);
 
-  const handleFileSelect = (fileId: string) => {
+  const handleFileSelect = (fileId: string, filename: string) => {
     setSelectedFileId(fileId);
+    setSelectedFileName(filename);
   };
 
   const handleKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,
-    fileId: string
+    fileId: string,
+    filename: string
   ) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault(); // Prevent default space bar scroll
-      handleFileSelect(fileId);
+      handleFileSelect(fileId, filename);
     }
   };
 
@@ -70,8 +75,8 @@ export default function Home() {
                   <li key={file.id}>
                     <button
                       type="button"
-                      onClick={() => handleFileSelect(file.id)}
-                      onKeyDown={(e) => handleKeyDown(e, file.id)}
+                      onClick={() => handleFileSelect(file.id, file.filename)}
+                      onKeyDown={(e) => handleKeyDown(e, file.id, file.filename)}
                       aria-pressed={selectedFileId === file.id}
                       className={`w-full text-left p-3 rounded border cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                         selectedFileId === file.id
@@ -92,9 +97,8 @@ export default function Home() {
               </ul>
             )}
           </div>
-
-          {/* Comment Section */}
           <div className="md:col-span-2">
+            <FileContent fileId={selectedFileId} filename={selectFilename} />
             <CommentSection fileId={selectedFileId} />
           </div>
         </div>

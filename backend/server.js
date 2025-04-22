@@ -67,7 +67,7 @@ app.get("/api/files/:fileId/content", (req, res) => {
         } else {
           res.json({
             error: 1,
-            message: "File type not supported",
+            content: "File type not supported",
           })
         }
       }
@@ -87,11 +87,12 @@ app.get("/api/files/:fileId/view", (req, res) => {
         const extension = filename.split(".").pop();
         if (extension == 'pdf') {
           const file = path.join(__dirname, "data", filename);
+          res.setHeader("Content-Type", "application/pdf");
           res.sendFile(file);
         } else {
           res.json({
             error: 1,
-            message: "File type not supported",
+            content: "File type not supported",
           })
         }
       }
