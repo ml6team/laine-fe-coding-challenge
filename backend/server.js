@@ -78,6 +78,30 @@ app.get("/api/files/:fileId/content", (req, res) => {
   }
 });
 
+app.get("/api/files/:fileId/view", (req, res) => {
+  const fileId = req.params.fileId;
+  try {
+    data.files.forEach((file) => {
+      if (file.id == fileId) {
+        const filename = file.filename;
+        const extension = filename.split(".").pop();
+        if (extension == 'pdf') {
+          const file = path.join(__dirname, "data", filename);
+          res.sendFile(file);
+        } else {
+          res.json({
+            error: 1,
+            message: "File type not supported",
+          })
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error writing to data.json:", error);
+    res.status(500).json({ error: "Failed to save comment" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
