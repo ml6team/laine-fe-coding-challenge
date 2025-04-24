@@ -9,6 +9,7 @@ interface File {
   id: string;
   name: string;
   uploadDate: string;
+  filename: string;
 }
 
 export default function Home() {
@@ -16,6 +17,9 @@ export default function Home() {
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null); // State for selected file ID
   const [isLoadingFiles, setIsLoadingFiles] = useState(false);
   const [errorFiles, setErrorFiles] = useState<string | null>(null);
+  const [previewContent, setPreviewContent] = useState("");
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [pdfURL, setPdfURL] = useState<string | null>(null);
 
   useEffect(() => {
     setIsLoadingFiles(true);
@@ -39,8 +43,52 @@ export default function Home() {
       });
   }, []);
 
+
+
+  const loadFilePreview = (fileId: string) => {
+    setPreviewContent("");
+    setPdfURL(null);
+    setIsLoadingPreview(true);
+      fetch(`http://localhost:3001/api/files/${fileId}/content`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch files");
+        }
+
+        return res.json();
+      })
+      .then((data: any) => {
+        console.log("html", data);
+        setPreviewContent(data.html);
+      })
+      .catch((err) => {
+
+      })
+      .finally( ()=> {
+        setIsLoadingPreview(false);
+      });
+  }
+
+  const loadPdfPreview = (fileId: string) => {
+    setPreviewContent("");
+    setPdfURL(`http://localhost:3001/api/files/${fileId}/view`);
+  }
+
   const handleFileSelect = (fileId: string) => {
     setSelectedFileId(fileId);
+
+    //get the file selected
+    const selectedFile = files.find(item => {
+      return item.id == fileId;
+    })
+
+    const filenameComps = selectedFile?.filename.split('.') || [];
+    const ext = (filenameComps[filenameComps?.length - 1]).toLowerCase();
+    if(ext == "docx") {
+      loadFilePreview(fileId);
+    } else if (ext == "pdf") {
+      loadPdfPreview(fileId);
+    }
   };
 
   const handleKeyDown = (
@@ -91,6 +139,15 @@ export default function Home() {
                 )}
               </ul>
             )}
+          </div>
+
+
+          {/* File preview section */}
+          <div>
+            { isLoadingPreview ? <p>Loading Preview</p> : ""}
+            <div dangerouslySetInnerHTML={{__html: previewContent}}></div>
+            
+            { pdfURL ? <iframe src={pdfURL} width={window.innerWidth / 2} height={700}></iframe> : "" }
           </div>
 
           {/* Comment Section */}
