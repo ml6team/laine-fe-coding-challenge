@@ -70,8 +70,7 @@ If the file is not a .docx file, proceed to the next check (or respond appropria
   })
 
   if(!file) {
-    //TODO: handle for next parser
-    return res.status(404);
+    return res.status(404).json({ error: "File not found" });
   }
 
   if (path.extname(file.filename) !== ".docx") {
@@ -87,7 +86,7 @@ If the file is not a .docx file, proceed to the next check (or respond appropria
     .catch(function(error) {
         console.error(error);
         //TODO: check official docs
-        return res.status(419);
+        return res.status(415).json({ error: "Unable to convert this file to html" });
     });
 
   //res.json(file);
@@ -105,13 +104,13 @@ If the file is not a PDF (and wasn't handled by DOCX conversion), respond with a
 */
   const fileId = req.params.fileId; 
   const file = data.files.find((item) => {
-    console.log(item);
+    //console.log(item);
     return item.id == fileId;// && item.filename.split('.')[1] === 'pdf'
   })
 
   if(!file) {
     //TODO: handle for next parser
-    return res.status(404);
+    return res.status(404).json({ error: "File not found" });
   }
   
   if (path.extname(file.filename) !== ".pdf") {
@@ -123,10 +122,11 @@ If the file is not a PDF (and wasn't handled by DOCX conversion), respond with a
   try {
     const content = await fs.readFile(filePath);
     if(!content) {
-      return res.status(404);
+      return res.status(404).json({ error: "File content not found" });
     }
   } catch(e) {
-    return res.status(404);
+    console.error(e);
+    return res.status(404).json({ error: "There's an error reading this file." });
   }
   return res.setHeader("Content-Type", "application/pdf").sendFile(filePath);
 });

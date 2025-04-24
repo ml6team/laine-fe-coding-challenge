@@ -17,6 +17,7 @@ export default function Home() {
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null); // State for selected file ID
   const [isLoadingFiles, setIsLoadingFiles] = useState(false);
   const [errorFiles, setErrorFiles] = useState<string | null>(null);
+  const [errorPreview, setErrorPreview] = useState<string | null>(null);
   const [previewContent, setPreviewContent] = useState("");
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [pdfURL, setPdfURL] = useState<string | null>(null);
@@ -62,7 +63,8 @@ export default function Home() {
         setPreviewContent(data.html);
       })
       .catch((err) => {
-
+        console.error("Error fetching file preview:", err);
+        setErrorPreview(err.message || "Could not load file preview.");
       })
       .finally( ()=> {
         setIsLoadingPreview(false);
@@ -76,7 +78,7 @@ export default function Home() {
 
   const handleFileSelect = (fileId: string) => {
     setSelectedFileId(fileId);
-
+    setErrorPreview(null);
     //get the file selected
     const selectedFile = files.find(item => {
       return item.id == fileId;
@@ -145,6 +147,7 @@ export default function Home() {
           {/* File preview section */}
           <div>
             { isLoadingPreview ? <p>Loading Preview</p> : ""}
+            {errorPreview && <p className="text-red-500">Error: {errorPreview}</p>}
             <div dangerouslySetInnerHTML={{__html: previewContent}}></div>
             
             { pdfURL ? <iframe src={pdfURL} width={window.innerWidth / 2} height={700}></iframe> : "" }
