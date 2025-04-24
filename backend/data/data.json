@@ -2,7 +2,7 @@
   "files": [
     {
       "id": "1",
-      "name": "Document A",
+      "name": "Document B",
       "uploadDate": "2025-04-17",
       "filename": "contract.pdf"
     },
@@ -35,9 +35,25 @@
         "id": "c1744915479434",
         "author": "Candidate",
         "text": "test 2\n"
+      },
+      {
+        "id": "c1745497955364",
+        "author": "Candidate",
+        "text": "This comment"
+      },
+      {
+        "id": "c1745497961097",
+        "author": "Candidate",
+        "text": "Another comment"
       }
     ],
-    "2": [],
+    "2": [
+      {
+        "id": "c1745497977867",
+        "author": "Candidate",
+        "text": "Comment Draft"
+      }
+    ],
     "3": [
       {
         "id": "c2",
@@ -48,6 +64,11 @@
         "id": "c3",
         "author": "User1",
         "text": "Agreed."
+      },
+      {
+        "id": "c1745497984655",
+        "author": "Candidate",
+        "text": "Word comment"
       }
     ]
   }
