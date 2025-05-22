@@ -3,3 +3,4 @@
 /frontend/node_modules/
 
 # Existing global ignores (if any) can go below
+instructions.txt
